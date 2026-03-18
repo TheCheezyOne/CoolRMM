@@ -826,6 +826,25 @@ function defenderBadge(def) {
   return `<span style="color:${color};font-size:10px;font-family:'DM Mono',monospace">${label}${age}</span>`;
 }
 
+// ── BLACKPOINT SNAP BADGE ─────────────────────────────────────────────────────
+function snapBadge(snap) {
+  const condition = snap?.condition;
+  if (!condition) {
+    // No data received from agent yet — show visibly so it's not silently missed
+    return `<span style="color:var(--yellow);font-size:10px;font-family:'DM Mono',monospace">Snap: no data</span>`;
+  }
+  const MAP = {
+    running       : { color: 'var(--green)',  label: 'Snap ✓'             },
+    stopped       : { color: 'var(--yellow)', label: 'Snap stopped'       },
+    disabled      : { color: 'var(--red)',    label: 'Snap DISABLED'      },
+    not_installed : { color: 'var(--red)',    label: 'Snap not installed'  },
+    unknown_state : { color: 'var(--yellow)', label: 'Snap unknown state'  },
+    check_error   : { color: 'var(--yellow)', label: 'Snap check failed'   },
+  };
+  const m = MAP[condition] || { color: 'var(--yellow)', label: `Snap: ${condition}` };
+  return `<span style="color:${m.color};font-size:10px;font-family:'DM Mono',monospace">${m.label}</span>`;
+}
+
 // ── USER BADGE ────────────────────────────────────────────────────────────────
 function userBadge(user) {
   if (!user || !user.logged_in) {
@@ -899,6 +918,7 @@ function renderDevices() {
       ${metricsHTML}
       <div style="padding:0 14px 12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         ${defenderBadge(dev.defender)}
+        ${snapBadge(dev.blackpoint_snap)}
         ${userBadge(dev.current_user)}
       </div>
       <div class="dev-spark-row">

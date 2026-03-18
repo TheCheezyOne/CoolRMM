@@ -29,12 +29,12 @@ import uvicorn
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
-HOST             = "0.0.0.0"
+HOST             = "192.168.40.157"
 PORT             = 8000
 OFFLINE_AFTER    = 120        # seconds without check-in → device shown as offline
 HISTORY_POINTS   = 20         # CPU history points kept per device
 DATA_FILE        = "devices.json"   # simple flat-file persistence
-DASHBOARD_FILE   = "rmm-mobile.html"
+DASHBOARD_FILE   = "rmm-mobile_v.0.1.1.html"
 # ─────────────────────────────────────────────────────────────────────────────
 
 logging.basicConfig(
@@ -287,7 +287,7 @@ async def api_devices():
             "blackpoint_snap": {
                 "installed"  : snap.get("installed", False),
                 "status_ok"  : snap.get("status_ok", False),
-                "condition"  : snap.get("condition", "unknown"),
+                "condition"  : snap.get("condition"),
             },
             "power": {
                 "source"     : power.get("power_source", "AC"),
@@ -349,4 +349,4 @@ async def health():
 
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    uvicorn.run("server:app", host=HOST, port=PORT, reload=False, log_level="info")
+    uvicorn.run(app, host=HOST, port=PORT, reload=False, log_level="info")

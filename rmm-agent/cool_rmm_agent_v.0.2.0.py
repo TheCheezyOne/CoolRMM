@@ -258,11 +258,14 @@ def get_blackpoint_snap_status() -> dict:
 
     SNAP_PROCESS_NAMES = {
         "snapagent.exe",
+        "snapw.exe",
+        "snap.exe",
         "bpagent.exe",
         "snap_agent.exe",
         "blackpointsnap.exe",
     }
     SNAP_SERVICE_NAMES = [
+        "Snap",               # ← confirmed name on your machines
         "SnapService",
         "BlackpointSnap",
         "BPAgent",
@@ -299,7 +302,7 @@ def get_blackpoint_snap_status() -> dict:
 
     # ── STEP 2: process not found — use PowerShell to find out why ────────────
     ps_script = """
-    $names = @('SnapService','BlackpointSnap','BPAgent','snap-agent')
+    $names = @('Snap','SnapService','BlackpointSnap','BPAgent','snap-agent')
     foreach ($n in $names) {
         $svc = Get-Service -Name $n -ErrorAction SilentlyContinue
         if ($svc) {
@@ -374,7 +377,7 @@ def get_blackpoint_snap_status() -> dict:
     }
 
 
-
+def get_os_info() -> dict:
     return {
         "name"     : platform.system(),
         "version"  : platform.version(),
