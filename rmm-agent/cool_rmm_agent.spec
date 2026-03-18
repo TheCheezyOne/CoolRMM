@@ -5,7 +5,7 @@
 #
 # Usage:
 #   pip install pyinstaller
-#   pyinstaller cool_rmm_agent.spec
+#   pyinstaller cool_rmm_agent_v.0.2.0.py
 #
 # Output: dist\cool_rmm_agent.exe
 # ─────────────────────────────────────────────────────────────────────────────
