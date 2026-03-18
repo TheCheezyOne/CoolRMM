@@ -1,0 +1,347 @@
+{
+  "c7f1b5cc-09d3-4d31-b717-cefc413d8cd4": {
+    "agent_version": "0.1.0",
+    "device_id": "c7f1b5cc-09d3-4d31-b717-cefc413d8cd4",
+    "timestamp": "2026-03-18T01:41:11.953428+00:00",
+    "uptime_sec": 483180,
+    "os": {
+      "name": "Windows",
+      "version": "10.0.26100",
+      "release": "11",
+      "machine": "AMD64",
+      "hostname": "DESKTOP-UDMNUD1"
+    },
+    "cpu": {
+      "usage_pct": 99.6,
+      "core_count": 4,
+      "freq_mhz": 3408.0
+    },
+    "memory": {
+      "total_gb": 8.48,
+      "used_pct": 73.9
+    },
+    "disk": {
+      "total_gb": 126.7,
+      "used_pct": 36.3
+    },
+    "current_user": {
+      "username": "WebsitePC",
+      "domain": "DESKTOP-UDMNUD1",
+      "logged_in": true,
+      "source": "wmic"
+    },
+    "defender": {
+      "available": true,
+      "enabled": true,
+      "realtime_protection": false,
+      "definition_age_days": 1.4,
+      "last_quick_scan_days": 5,
+      "last_full_scan_days": 4294967295,
+      "status_ok": false
+    },
+    "power": {
+      "online": true,
+      "power_source": "AC",
+      "battery_pct": null,
+      "is_laptop": false
+    },
+    "last_seen": 1773798080.519549,
+    "cpu_history": [
+      25.5,
+      24.9,
+      31.2,
+      13.2,
+      9.7,
+      8.1,
+      20.6,
+      17.2,
+      23.8,
+      22.1,
+      9.7,
+      7.4,
+      7.4,
+      8.1,
+      10.2,
+      16.7,
+      35.0,
+      10.0,
+      9.0,
+      99.6
+    ],
+    "checkin_count": 3406
+  },
+  "1ca9c7b7-102d-4677-aaf0-98e630e7f191": {
+    "agent_version": "0.1.0",
+    "device_id": "1ca9c7b7-102d-4677-aaf0-98e630e7f191",
+    "timestamp": "2026-03-18T01:40:12.826557+00:00",
+    "uptime_sec": 388613,
+    "os": {
+      "name": "Windows",
+      "version": "10.0.26200",
+      "release": "11",
+      "machine": "AMD64",
+      "hostname": "TechSandbox"
+    },
+    "cpu": {
+      "usage_pct": 25.1,
+      "core_count": 4,
+      "freq_mhz": 2700.0
+    },
+    "memory": {
+      "total_gb": 16.04,
+      "used_pct": 36.0
+    },
+    "disk": {
+      "total_gb": 1022.8,
+      "used_pct": 5.1
+    },
+    "current_user": {
+      "username": "tech",
+      "domain": "",
+      "logged_in": true,
+      "source": "query_user"
+    },
+    "defender": {
+      "available": true,
+      "enabled": true,
+      "realtime_protection": false,
+      "definition_age_days": 1.8,
+      "last_quick_scan_days": 7,
+      "last_full_scan_days": 4294967295,
+      "status_ok": false
+    },
+    "power": {
+      "online": true,
+      "power_source": "AC",
+      "battery_pct": null,
+      "is_laptop": false
+    },
+    "last_seen": 1773798016.836375,
+    "cpu_history": [
+      1.6,
+      0.4,
+      2.7,
+      3.5,
+      5.4,
+      3.1,
+      4.7,
+      3.9,
+      0.4,
+      1.6,
+      1.6,
+      6.2,
+      3.5,
+      4.2,
+      1.6,
+      4.2,
+      2.7,
+      3.5,
+      4.7,
+      25.1
+    ],
+    "checkin_count": 2121
+  },
+  "3be10fff-fbd8-4764-b559-e3bde58e72ca": {
+    "agent_version": "0.1.0",
+    "device_id": "3be10fff-fbd8-4764-b559-e3bde58e72ca",
+    "timestamp": "2026-03-11T16:06:21.445668+00:00",
+    "uptime_sec": 15281,
+    "os": {
+      "name": "Windows",
+      "version": "10.0.26200",
+      "release": "11",
+      "machine": "AMD64",
+      "hostname": "DESKTOP-OU5D9KI"
+    },
+    "cpu": {
+      "usage_pct": 4.1,
+      "core_count": 12,
+      "freq_mhz": 1700.0
+    },
+    "memory": {
+      "total_gb": 16.85,
+      "used_pct": 48.7
+    },
+    "disk": {
+      "total_gb": 1001.3,
+      "used_pct": 7.2
+    },
+    "current_user": {
+      "username": "Tech",
+      "domain": "DESKTOP-OU5D9KI",
+      "logged_in": true,
+      "source": "explorer_proc"
+    },
+    "defender": {
+      "available": true,
+      "enabled": true,
+      "realtime_protection": false,
+      "definition_age_days": 0.4,
+      "last_quick_scan_days": 4294967295,
+      "last_full_scan_days": 4294967295,
+      "status_ok": false
+    },
+    "power": {
+      "online": true,
+      "power_source": "AC",
+      "battery_pct": 100,
+      "is_laptop": true
+    },
+    "last_seen": 1773245185.294572,
+    "cpu_history": [
+      1.3,
+      2.2,
+      2.2,
+      1.9,
+      1.8,
+      2.3,
+      1.8,
+      1.5,
+      1.5,
+      1.3,
+      2.7,
+      0.9,
+      2.6,
+      0.6,
+      1.2,
+      2.1,
+      10.2,
+      1.5,
+      2.5,
+      4.1
+    ],
+    "checkin_count": 196
+  },
+  "cfb53e4d-dbf4-43c4-b7ff-1724ce00827e": {
+    "agent_version": "0.1.0",
+    "device_id": "cfb53e4d-dbf4-43c4-b7ff-1724ce00827e",
+    "timestamp": "2026-03-12T13:18:57.718855+00:00",
+    "uptime_sec": 1127397,
+    "os": {
+      "name": "Windows",
+      "version": "10.0.26200",
+      "release": "11",
+      "machine": "AMD64",
+      "hostname": "DESKTOP-EGTR5JL"
+    },
+    "cpu": {
+      "usage_pct": 2.6,
+      "core_count": 28,
+      "freq_mhz": 2100.0
+    },
+    "memory": {
+      "total_gb": 16.85,
+      "used_pct": 73.9
+    },
+    "disk": {
+      "total_gb": 508.9,
+      "used_pct": 24.6
+    },
+    "current_user": {
+      "username": "tech",
+      "domain": "",
+      "logged_in": true,
+      "source": "query_user"
+    },
+    "defender": {
+      "available": false,
+      "error": "Cannot find an overload for \"op_Subtraction\" and the argument count: \"2\"."
+    },
+    "power": {
+      "online": true,
+      "power_source": "AC",
+      "battery_pct": null,
+      "is_laptop": false
+    },
+    "last_seen": 1773321539.035292,
+    "cpu_history": [
+      1.0,
+      0.8,
+      0.8,
+      0.8,
+      0.9,
+      1.0,
+      1.0,
+      1.1,
+      0.8,
+      1.1,
+      0.9,
+      1.2,
+      1.9,
+      1.4,
+      1.1,
+      1.3,
+      0.6,
+      2.0,
+      0.8,
+      2.6
+    ],
+    "checkin_count": 457
+  },
+  "49db4427-835f-4f90-8e6e-68ec2dbef3fc": {
+    "agent_version": "0.1.0",
+    "device_id": "49db4427-835f-4f90-8e6e-68ec2dbef3fc",
+    "timestamp": "2026-03-16T20:22:26.707586+00:00",
+    "uptime_sec": 271778,
+    "os": {
+      "name": "Windows",
+      "version": "10.0.26200",
+      "release": "11",
+      "machine": "AMD64",
+      "hostname": "DESKTOP-36F6N1N"
+    },
+    "cpu": {
+      "usage_pct": 0.0,
+      "core_count": 8,
+      "freq_mhz": 1696.0
+    },
+    "memory": {
+      "total_gb": 17.09,
+      "used_pct": 32.2
+    },
+    "disk": {
+      "total_gb": 263.1,
+      "used_pct": 20.0
+    },
+    "current_user": {
+      "username": "user",
+      "domain": "",
+      "logged_in": true,
+      "source": "query_user"
+    },
+    "defender": {
+      "available": false,
+      "error": "Cannot find an overload for \"op_Subtraction\" and the argument count: \"2\"."
+    },
+    "power": {
+      "online": true,
+      "power_source": "AC",
+      "battery_pct": null,
+      "is_laptop": false
+    },
+    "last_seen": 1773692548.7115617,
+    "cpu_history": [
+      0.2,
+      0.0,
+      0.4,
+      0.0,
+      0.4,
+      0.4,
+      4.1,
+      0.4,
+      0.0,
+      1.6,
+      68.8,
+      0.4,
+      0.2,
+      1.0,
+      1.9,
+      0.4,
+      0.0,
+      0.2,
+      0.4,
+      0.0
+    ],
+    "checkin_count": 330
+  }
+}

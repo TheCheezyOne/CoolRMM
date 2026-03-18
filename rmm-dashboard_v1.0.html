@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL RMM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0c0f;
+    --surface:   #111418;
+    --border:    #1e242c;
+    --border2:   #2a3340;
+    --text:      #c8d4e0;
+    --muted:     #4a5a6a;
+    --green:     #00e5a0;
+    --yellow:    #f5c542;
+    --red:       #ff4b5c;
+    --blue:      #3b9eff;
+    --accent:    #00e5a0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* scanline texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .wordmark {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .wordmark span { color: var(--muted); font-weight: 300; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .pulse-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,229,160,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(0,229,160,0); }
+  }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 48px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    background: var(--surface);
+  }
+
+  .nav-section {
+    margin-bottom: 28px;
+  }
+
+  .nav-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    padding: 0 20px 8px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    font-size: 11px;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,229,160,0.05); }
+  .nav-item svg { width: 14px; height: 14px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active svg { opacity: 1; }
+
+  /* badge */
+  .badge {
+    margin-left: auto;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    background: rgba(255,75,92,0.15);
+    color: var(--red);
+    border: 1px solid rgba(255,75,92,0.3);
+  }
+  .badge.green { background: rgba(0,229,160,0.1); color: var(--green); border-color: rgba(0,229,160,0.2); }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.8;
+  }
+
+  /* MAIN */
+  .main {
+    padding: 24px 28px;
+    overflow-y: auto;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 18px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .header-actions { display: flex; gap: 8px; }
+
+  .btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 7px 14px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .btn:hover { color: var(--text); border-color: var(--text); }
+  .btn.primary { border-color: var(--accent); color: var(--accent); }
+  .btn.primary:hover { background: rgba(0,229,160,0.1); }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border2), transparent);
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-size: 28px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-delta { font-size: 10px; color: var(--muted); }
+
+  /* DEVICE GRID */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .device-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .device-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .device-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .device-card.online { border-top: 2px solid var(--green); }
+  .device-card.warning { border-top: 2px solid var(--yellow); }
+  .device-card.offline { border-top: 2px solid var(--red); }
+
+  .device-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .device-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+    letter-spacing: 0.02em;
+  }
+  .device-meta { font-size: 10px; color: var(--muted); }
+
+  .status-pill {
+    font-size: 9px;
+    padding: 2px 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .status-pill.online { background: rgba(0,229,160,0.1); color: var(--green); border: 1px solid rgba(0,229,160,0.25); }
+  .status-pill.warning { background: rgba(245,197,66,0.1); color: var(--yellow); border: 1px solid rgba(245,197,66,0.25); }
+  .status-pill.offline { background: rgba(255,75,92,0.1); color: var(--red); border: 1px solid rgba(255,75,92,0.25); }
+
+  .device-metrics {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 36px;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+  }
+  .metric-name { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .metric-val { text-align: right; font-weight: 500; font-size: 11px; }
+
+  .bar-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 0;
+    transition: width 1s ease;
+  }
+  .bar-fill.low { background: var(--green); }
+  .bar-fill.med { background: var(--yellow); }
+  .bar-fill.high { background: var(--red); }
+
+  .device-footer {
+    padding: 9px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .last-seen { display: flex; align-items: center; gap: 5px; }
+
+  /* ALERT TABLE */
+  .alert-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+  }
+  .alert-table th {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .alert-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    vertical-align: middle;
+  }
+  .alert-table tr:last-child td { border-bottom: none; }
+  .alert-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .sev {
+    font-size: 9px;
+    padding: 2px 7px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    font-weight: 500;
+    display: inline-block;
+  }
+  .sev.crit { background: rgba(255,75,92,0.12); color: var(--red); border: 1px solid rgba(255,75,92,0.3); }
+  .sev.warn { background: rgba(245,197,66,0.12); color: var(--yellow); border: 1px solid rgba(245,197,66,0.3); }
+  .sev.info { background: rgba(59,158,255,0.12); color: var(--blue); border: 1px solid rgba(59,158,255,0.3); }
+
+  .alert-msg { color: var(--text); }
+  .alert-host { color: var(--muted); }
+  .alert-time { color: var(--muted); font-size: 10px; }
+
+  /* BOTTOM GRID */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .panel-body { padding: 14px 16px; }
+
+  /* SPARKLINE */
+  .sparkline-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .spark-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 40px;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+  }
+  .spark-label { color: var(--muted); }
+  .spark-val { text-align: right; font-weight: 500; }
+
+  canvas.spark {
+    width: 100%;
+    height: 28px;
+    display: block;
+  }
+
+  /* LOG */
+  .log-list {
+    font-size: 10px;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .log-entry {
+    display: grid;
+    grid-template-columns: 80px 50px 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(30,36,44,0.6);
+    align-items: baseline;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-ts { color: var(--muted); font-size: 9px; }
+  .log-host { color: var(--blue); }
+  .log-msg { color: var(--text); }
+
+  /* TICK CLOCK */
+  #clock { font-size: 11px; color: var(--accent); letter-spacing: 0.08em; }
+
+  /* SLOT PLACEHOLDER */
+  .device-slot {
+    border: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .device-slot:hover { border-color: var(--border2); color: var(--text); }
+  .device-slot svg { width: 18px; height: 18px; opacity: 0.4; }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    padding: 8px 12px;
+    font-size: 10px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 9999;
+    max-width: 200px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .tooltip.show { opacity: 1; }
+
+  /* scroll */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  /* animate in */
+  .device-card, .stat-card, .panel {
+    animation: fadeUp 0.4s ease both;
+  }
+  .device-card:nth-child(2) { animation-delay: 0.06s; }
+  .device-card:nth-child(3) { animation-delay: 0.12s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="wordmark">SENTINEL <span>// RMM</span></div>
+  <div class="topbar-right">
+    <span><span class="pulse-dot"></span>LIVE</span>
+    <span id="clock">--:--:--</span>
+    <span>v0.1.0-proto</span>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Monitor</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M5 14h6M8 12v2" stroke="currentColor" stroke-width="1.2"/></svg>
+        Devices
+        <span class="badge green">3</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 2v4M8 10v4M2 8h4M10 8h4"/><circle cx="8" cy="8" r="2.5"/></svg>
+        Alerts
+        <span class="badge">2</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="2,12 5,7 8,9 11,4 14,6"/></svg>
+        Metrics
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12M6 6v8"/></svg>
+        Event Log
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Manage</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41"/></svg>
+        Remote
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+        Policies
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 2a6 6 0 100 12A6 6 0 008 2z"/><path d="M8 5v3l2 1"/></svg>
+        Tasks
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+        Users
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/></svg>
+        Settings
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      ENDPOINT: 10.0.0.1:8443<br>
+      POLL: 60s interval<br>
+      RETENTION: 30d
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Overview</div>
+        <div class="page-sub">Device Dashboard</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="refreshAll()">↻ REFRESH</button>
+        <button class="btn primary" onclick="addDevice()">+ ADD DEVICE</button>
+      </div>
+    </div>
+
+    <!-- STAT ROW -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Devices Online</div>
+        <div class="stat-value green" id="stat-online">2</div>
+        <div class="stat-delta">of 3 registered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Alerts</div>
+        <div class="stat-value red" id="stat-alerts">2</div>
+        <div class="stat-delta">1 critical, 1 warning</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg CPU</div>
+        <div class="stat-value yellow" id="stat-cpu">61%</div>
+        <div class="stat-delta">across online devices</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Last Check-In</div>
+        <div class="stat-value blue" id="stat-checkin">0s</div>
+        <div class="stat-delta">DESKTOP-01 just now</div>
+      </div>
+    </div>
+
+    <!-- DEVICE CARDS -->
+    <div class="section-label">Registered Devices</div>
+    <div class="device-grid" id="device-grid">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+      <!-- ALERTS TABLE -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Active Alerts</span>
+          <span style="font-size:10px;color:var(--muted)">2 open</span>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <table class="alert-table">
+            <thead>
+              <tr>
+                <th>SEV</th>
+                <th>DEVICE</th>
+                <th>MESSAGE</th>
+                <th>TIME</th>
+              </tr>
+            </thead>
+            <tbody id="alert-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EVENT LOG -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Event Log</span>
+          <span style="font-size:10px;color:var(--muted)" id="log-count">0 entries</span>
+        </div>
+        <div class="panel-body">
+          <div class="log-list" id="log-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPARKLINES PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">CPU History (last 20 polls)</span>
+        <span style="font-size:10px;color:var(--muted)">1 min interval</span>
+      </div>
+      <div class="panel-body">
+        <div class="sparkline-wrap" id="spark-wrap"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ─── DATA MODEL ─────────────────────────────────────────────────────────────
+const devices = [
+  {
+    id: 'dev-001',
+    hostname: 'DESKTOP-01',
+    ip: '10.0.0.21',
+    os: 'Windows 11 Pro 23H2',
+    role: 'Workstation',
+    status: 'online',
+    uptime: 93600,        // seconds
+    cpu: 0,
+    ram: 0,
+    disk: 0,
+    history: [],
+  },
+  {
+    id: 'dev-002',
+    hostname: 'SERVER-01',
+    ip: '10.0.0.10',
+    os: 'Ubuntu 24.04 LTS',
+    role: 'Server',
+    status: 'warning',
+    uptime: 1209600,
+    cpu: 0,
+    ram: 0,
+    disk: 0,
+    history: [],
+  },
+  {
+    id: 'dev-003',
+    hostname: 'LAPTOP-01',
+    ip: '—',
+    os: 'macOS 15 Sequoia',
+    role: 'Laptop',
+    status: 'offline',
+    uptime: 0,
+    cpu: 0,
+    ram: 0,
+    disk: 0,
+    history: [],
+  }
+];
+
+const alerts = [
+  { sev: 'crit', device: 'SERVER-01', msg: 'Disk usage exceeded 89% on /dev/sda1', time: '2m ago' },
+  { sev: 'warn', device: 'DESKTOP-01', msg: 'CPU sustained above 80% for 10 min', time: '11m ago' },
+];
+
+const logEntries = [];
+
+// ─── SIMULATE METRICS ────────────────────────────────────────────────────────
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+function seedHistory(dev) {
+  if (dev.status === 'offline') { dev.history = Array(20).fill(0); return; }
+  const base = dev.id === 'dev-002' ? 70 : 45;
+  dev.history = Array.from({length: 20}, () => Math.round(rand(base - 15, base + 20)));
+}
+
+function updateMetrics(dev) {
+  if (dev.status === 'offline') { dev.cpu = 0; dev.ram = 0; dev.disk = 0; return; }
+  const base = dev.id === 'dev-002' ? 72 : 48;
+  dev.cpu  = Math.round(rand(base - 12, base + 15));
+  dev.ram  = Math.round(rand(30, 78));
+  dev.disk = dev.id === 'dev-002' ? Math.round(rand(84, 91)) : Math.round(rand(30, 55));
+  dev.history.push(dev.cpu);
+  if (dev.history.length > 20) dev.history.shift();
+  dev.uptime += 60;
+}
+
+function fmtUptime(s) {
+  if (!s) return 'offline';
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+  if (d) return `${d}d ${h}h`;
+  if (h) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function barClass(v) {
+  if (v >= 85) return 'high';
+  if (v >= 65) return 'med';
+  return 'low';
+}
+
+function metricColor(v) {
+  if (v >= 85) return 'var(--red)';
+  if (v >= 65) return 'var(--yellow)';
+  return 'var(--green)';
+}
+
+// ─── RENDER DEVICES ──────────────────────────────────────────────────────────
+function renderDevices() {
+  const grid = document.getElementById('device-grid');
+  grid.innerHTML = '';
+
+  devices.forEach(dev => {
+    const card = document.createElement('div');
+    card.className = `device-card ${dev.status}`;
+    card.innerHTML = `
+      <div class="device-header">
+        <div>
+          <div class="device-name">${dev.hostname}</div>
+          <div class="device-meta">${dev.ip} &nbsp;·&nbsp; ${dev.role}</div>
+        </div>
+        <span class="status-pill ${dev.status}">${dev.status}</span>
+      </div>
+      <div class="device-metrics">
+        ${dev.status !== 'offline' ? `
+        <div class="metric-row">
+          <span class="metric-name">CPU</span>
+          <div class="bar-track"><div class="bar-fill ${barClass(dev.cpu)}" style="width:${dev.cpu}%"></div></div>
+          <span class="metric-val" style="color:${metricColor(dev.cpu)}">${dev.cpu}%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">RAM</span>
+          <div class="bar-track"><div class="bar-fill ${barClass(dev.ram)}" style="width:${dev.ram}%"></div></div>
+          <span class="metric-val" style="color:${metricColor(dev.ram)}">${dev.ram}%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">DSK</span>
+          <div class="bar-track"><div class="bar-fill ${barClass(dev.disk)}" style="width:${dev.disk}%"></div></div>
+          <span class="metric-val" style="color:${metricColor(dev.disk)}">${dev.disk}%</span>
+        </div>
+        ` : `<div style="color:var(--muted);font-size:11px;padding:12px 0;text-align:center">No data — device offline</div>`}
+      </div>
+      <div class="device-footer">
+        <span class="last-seen">
+          ${dev.status !== 'offline'
+            ? `<span style="color:var(--green);font-size:9px">●</span> just now`
+            : `<span style="color:var(--red);font-size:9px">●</span> last seen 47m ago`}
+        </span>
+        <span style="color:var(--muted)">${fmtUptime(dev.uptime)}</span>
+      </div>
+    `;
+    card.title = dev.os;
+    grid.appendChild(card);
+  });
+
+  // Slot for future devices
+  const slot = document.createElement('div');
+  slot.className = 'device-slot';
+  slot.innerHTML = `
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2">
+      <circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/>
+    </svg>
+    Add device
+  `;
+  slot.onclick = addDevice;
+  grid.appendChild(slot);
+}
+
+// ─── RENDER ALERTS ───────────────────────────────────────────────────────────
+function renderAlerts() {
+  const tbody = document.getElementById('alert-body');
+  tbody.innerHTML = alerts.map(a => `
+    <tr>
+      <td><span class="sev ${a.sev}">${a.sev}</span></td>
+      <td class="alert-host">${a.device}</td>
+      <td class="alert-msg">${a.msg}</td>
+      <td class="alert-time">${a.time}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── RENDER LOG ──────────────────────────────────────────────────────────────
+function addLog(host, msg) {
+  const now = new Date();
+  const ts = now.toLocaleTimeString('en-US', {hour12: false});
+  logEntries.unshift({ts, host, msg});
+  if (logEntries.length > 8) logEntries.pop();
+  renderLog();
+}
+
+function renderLog() {
+  const list = document.getElementById('log-list');
+  document.getElementById('log-count').textContent = logEntries.length + ' entries';
+  list.innerHTML = logEntries.map(e => `
+    <div class="log-entry">
+      <span class="log-ts">${e.ts}</span>
+      <span class="log-host">${e.host}</span>
+      <span class="log-msg">${e.msg}</span>
+    </div>
+  `).join('');
+}
+
+// ─── SPARKLINES ──────────────────────────────────────────────────────────────
+function drawSparkline(canvas, data, color) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth, h = canvas.offsetHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  if (!data.length) return;
+  const max = 100, min = 0;
+  const pts = data.map((v, i) => ({
+    x: (i / (data.length - 1)) * w,
+    y: h - ((v - min) / (max - min)) * h
+  }));
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.stroke();
+
+  // fill
+  ctx.beginPath();
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, h);
+  ctx.lineTo(0, h);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, color + '33');
+  grad.addColorStop(1, color + '00');
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+function renderSparklines() {
+  const wrap = document.getElementById('spark-wrap');
+  wrap.innerHTML = '';
+  const colors = ['var(--green)', 'var(--yellow)', 'var(--red)'];
+  devices.forEach((dev, i) => {
+    const row = document.createElement('div');
+    row.className = 'spark-row';
+    row.innerHTML = `
+      <span class="spark-label">${dev.hostname}</span>
+      <canvas class="spark" id="spark-${dev.id}" height="28"></canvas>
+      <span class="spark-val" style="color:${dev.status !== 'offline' ? colors[i] : 'var(--muted)'}">${dev.status !== 'offline' ? dev.cpu + '%' : '—'}</span>
+    `;
+    wrap.appendChild(row);
+
+    requestAnimationFrame(() => {
+      const canvas = document.getElementById('spark-' + dev.id);
+      if (canvas) drawSparkline(canvas, dev.history, dev.status !== 'offline' ? colors[i].replace('var(','').replace(')','') : '#2a3340');
+    });
+  });
+}
+
+// ─── STATS UPDATE ────────────────────────────────────────────────────────────
+function updateStats() {
+  const online = devices.filter(d => d.status !== 'offline');
+  document.getElementById('stat-online').textContent = online.length;
+  const avgCpu = online.length ? Math.round(online.reduce((a, d) => a + d.cpu, 0) / online.length) : 0;
+  document.getElementById('stat-cpu').textContent = avgCpu + '%';
+  document.getElementById('stat-cpu').className = 'stat-value ' + (avgCpu >= 80 ? 'red' : avgCpu >= 60 ? 'yellow' : 'green');
+}
+
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+function tickClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US', {hour12: false});
+}
+
+// ─── POLL CYCLE ──────────────────────────────────────────────────────────────
+let pollCount = 0;
+function poll() {
+  pollCount++;
+  devices.forEach(dev => updateMetrics(dev));
+
+  // random log events
+  const online = devices.filter(d => d.status !== 'offline');
+  if (online.length) {
+    const dev = online[Math.floor(Math.random() * online.length)];
+    const msgs = ['heartbeat OK', 'metrics collected', 'disk check passed', 'cpu sample taken', 'agent active'];
+    addLog(dev.hostname, msgs[Math.floor(Math.random() * msgs.length)]);
+  }
+
+  renderDevices();
+  renderSparklines();
+  updateStats();
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function refreshAll() {
+  addLog('SYSTEM', 'manual refresh triggered');
+  poll();
+}
+
+function addDevice() {
+  alert('In production: this would open the agent installation wizard and generate a one-time enrollment token.');
+}
+
+// ─── CSS VAR SPARKLINE COLORS ────────────────────────────────────────────────
+// canvas can't read CSS vars — map them
+const sparkColors = ['#00e5a0', '#f5c542', '#ff4b5c'];
+
+function renderSparklinesReal() {
+  const wrap = document.getElementById('spark-wrap');
+  wrap.innerHTML = '';
+  devices.forEach((dev, i) => {
+    const row = document.createElement('div');
+    row.className = 'spark-row';
+    row.innerHTML = `
+      <span class="spark-label">${dev.hostname}</span>
+      <canvas class="spark" id="spark-${dev.id}" height="28"></canvas>
+      <span class="spark-val" style="color:${dev.status !== 'offline' ? sparkColors[i] : '#2a3340'}">${dev.status !== 'offline' ? dev.cpu + '%' : '—'}</span>
+    `;
+    wrap.appendChild(row);
+
+    requestAnimationFrame(() => {
+      const canvas = document.getElementById('spark-' + dev.id);
+      if (canvas) drawSparkline(canvas, dev.history, dev.status !== 'offline' ? sparkColors[i] : '#2a3340');
+    });
+  });
+}
+
+// patch the render to use real colors
+(function() {
+  const orig = renderSparklines;
+  window.renderSparklines = renderSparklinesReal;
+})();
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+devices.forEach(seedHistory);
+devices.forEach(updateMetrics);
+renderDevices();
+renderAlerts();
+renderSparklinesReal();
+updateStats();
+addLog('SYSTEM', 'sentinel rmm started');
+addLog('dev-001', 'DESKTOP-01 enrolled');
+addLog('dev-002', 'SERVER-01 enrolled');
+addLog('dev-003', 'LAPTOP-01 last seen 47m ago');
+
+setInterval(tickClock, 1000);
+tickClock();
+
+// Auto-poll every 8s (simulated 60s interval)
+setInterval(poll, 8000);
+</script>
+</body>
+</html>

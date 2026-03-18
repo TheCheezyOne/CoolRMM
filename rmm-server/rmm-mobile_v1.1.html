@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#090b0e">
+<title>Cool RMM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #090b0e;
+  --surf:     #0f1318;
+  --surf2:    #141920;
+  --border:   #1c2330;
+  --border2:  #263040;
+  --text:     #d0dcea;
+  --sub:      #5a6e82;
+  --green:    #0fdf8f;
+  --yellow:   #f0b429;
+  --red:      #f53d5b;
+  --blue:     #3d9bff;
+  --safe:     env(safe-area-inset-bottom, 0px);
+}
+
+html { background: var(--bg); }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(9,11,14,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: env(safe-area-inset-top, 0) 0 0;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 16px;
+}
+
+.wordmark {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.wordmark small {
+  font-size: 10px;
+  color: var(--sub);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 0.08em;
+}
+
+.pulse {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(15,223,143,.5); }
+  50%      { opacity:.6; box-shadow: 0 0 0 5px rgba(15,223,143,0); }
+}
+
+/* hamburger */
+.hamburger {
+  width: 36px; height: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surf);
+  border-radius: 6px;
+}
+.hamburger span {
+  display: block;
+  width: 16px; height: 1.5px;
+  background: var(--sub);
+  transition: all 0.25s;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); background: var(--text); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--text); }
+
+/* ── SLIDE DRAWER ── */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+  pointer-events: none;
+}
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  opacity: 0;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(2px);
+}
+.drawer-panel {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 260px;
+  background: var(--surf);
+  border-left: 1px solid var(--border);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  padding-top: env(safe-area-inset-top, 52px);
+  overflow-y: auto;
+}
+.drawer.open { pointer-events: all; }
+.drawer.open .drawer-backdrop { opacity: 1; }
+.drawer.open .drawer-panel { transform: translateX(0); }
+
+.drawer-nav { padding: 16px 0; }
+.nav-section-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--sub);
+  text-transform: uppercase;
+  padding: 12px 20px 6px;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 20px;
+  font-size: 13px;
+  color: var(--sub);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.nav-link.active { color: var(--green); border-left-color: var(--green); background: rgba(15,223,143,.05); }
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.nav-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(245,61,91,.15);
+  color: var(--red);
+  border: 1px solid rgba(245,61,91,.25);
+  font-family: 'DM Mono', monospace;
+}
+.nav-badge.g { background: rgba(15,223,143,.1); color: var(--green); border-color: rgba(15,223,143,.2); }
+
+.drawer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--sub);
+  line-height: 1.9;
+}
+
+/* ── CONTENT ── */
+.content {
+  padding: 16px 14px calc(16px + var(--safe));
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.sum-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 14px 12px;
+  position: relative;
+  overflow: hidden;
+}
+.sum-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.sum-card.c-green::after { background: var(--green); }
+.sum-card.c-red::after   { background: var(--red); }
+.sum-card.c-yellow::after { background: var(--yellow); }
+.sum-card.c-blue::after  { background: var(--blue); }
+
+.sum-label {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sub);
+  margin-bottom: 6px;
+  font-family: 'DM Mono', monospace;
+}
+.sum-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.sum-val.green  { color: var(--green); }
+.sum-val.red    { color: var(--red); }
+.sum-val.yellow { color: var(--yellow); }
+.sum-val.blue   { color: var(--blue); }
+.sum-sub { font-size: 10px; color: var(--sub); }
+
+/* ── SECTION HEADER ── */
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sec-title {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--sub);
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+}
+.sec-action {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--green);
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  border: 1px solid rgba(15,223,143,.25);
+  padding: 4px 10px;
+  border-radius: 3px;
+  background: transparent;
+  -webkit-appearance: none;
+}
+.sec-action:active { background: rgba(15,223,143,.08); }
+
+/* ── DEVICE CARDS ── */
+.device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.dev-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  animation: fadeUp 0.35s ease both;
+}
+.dev-card:nth-child(2) { animation-delay: .07s; }
+.dev-card:nth-child(3) { animation-delay: .14s; }
+.dev-card:active { background: var(--surf2); }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.dev-card.online  { border-left: 3px solid var(--green); }
+.dev-card.warning { border-left: 3px solid var(--yellow); }
+.dev-card.offline { border-left: 3px solid var(--red); }
+
+/* card header row */
+.dev-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+}
+
+.dev-ident { flex: 1; min-width: 0; }
+.dev-hostname {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+.dev-meta {
+  font-size: 11px;
+  color: var(--sub);
+  margin-top: 1px;
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dev-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-left: 10px; }
+
+.status-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.status-pill.online  { background: rgba(15,223,143,.12); color: var(--green); border: 1px solid rgba(15,223,143,.3); }
+.status-pill.warning { background: rgba(240,180,41,.12); color: var(--yellow); border: 1px solid rgba(240,180,41,.3); }
+.status-pill.offline { background: rgba(245,61,91,.12);  color: var(--red);    border: 1px solid rgba(245,61,91,.3); }
+
+.dev-uptime {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--sub);
+}
+
+/* metrics grid inside card */
+.dev-metrics {
+  padding: 0 14px 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.metric-block {
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 10px 8px;
+}
+.metric-block .m-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sub);
+  margin-bottom: 5px;
+}
+.metric-block .m-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.m-val.low    { color: var(--green); }
+.m-val.med    { color: var(--yellow); }
+.m-val.high   { color: var(--red); }
+.m-val.off    { color: var(--sub); }
+
+.bar-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+.bar-fill.low  { background: var(--green); }
+.bar-fill.med  { background: var(--yellow); }
+.bar-fill.high { background: var(--red); }
+.bar-fill.off  { background: var(--border2); width: 100% !important; }
+
+/* offline overlay */
+.dev-offline-msg {
+  margin: 0 14px 14px;
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 11px;
+  color: var(--sub);
+  font-family: 'DM Mono', monospace;
+  text-align: center;
+}
+
+/* expandable spark */
+.dev-spark-row {
+  padding: 0 14px 14px;
+  display: none;
+}
+.dev-card.expanded .dev-spark-row { display: block; }
+.spark-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--sub);
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 6px;
+}
+canvas.spark {
+  width: 100%;
+  height: 36px;
+  display: block;
+}
+
+/* add device slot */
+.add-slot {
+  border: 1px dashed var(--border2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: var(--sub);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 24px;
+  transition: border-color .2s, color .2s;
+}
+.add-slot:active { border-color: var(--border2); color: var(--text); background: var(--surf); }
+
+/* ── ALERTS SECTION ── */
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.alert-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.alert-card.crit { border-left: 3px solid var(--red); }
+.alert-card.warn { border-left: 3px solid var(--yellow); }
+.alert-card.info { border-left: 3px solid var(--blue); }
+
+.alert-sev {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.alert-sev.crit { background: rgba(245,61,91,.12); color: var(--red); border: 1px solid rgba(245,61,91,.3); }
+.alert-sev.warn { background: rgba(240,180,41,.12); color: var(--yellow); border: 1px solid rgba(240,180,41,.3); }
+
+.alert-body { flex: 1; min-width: 0; }
+.alert-msg { font-size: 13px; color: var(--text); margin-bottom: 3px; }
+.alert-meta { font-size: 10px; color: var(--sub); font-family: 'DM Mono', monospace; }
+
+/* ── LOG SECTION ── */
+.log-panel {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.log-panel-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.log-panel-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sub);
+}
+.log-entry {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 12px;
+}
+.log-entry:last-child { border-bottom: none; }
+.log-ts { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--sub); }
+.log-content { color: var(--text); }
+.log-host { color: var(--blue); margin-right: 6px; }
+
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(9,11,14,0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 200;
+}
+.bottom-nav-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 0;
+  color: var(--sub);
+  cursor: pointer;
+  transition: color 0.15s;
+  position: relative;
+}
+.bnav-item.active { color: var(--green); }
+.bnav-item svg { width: 20px; height: 20px; }
+.bnav-item span { font-size: 9px; letter-spacing: 0.05em; font-family: 'DM Mono', monospace; }
+.bnav-badge {
+  position: absolute;
+  top: 6px; right: 50%;
+  transform: translateX(10px);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .bottom-nav { display: block; }
+  .content { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  .hamburger { display: none; }
+}
+
+@media (min-width: 601px) {
+  .summary-strip { grid-template-columns: repeat(4, 1fr); }
+  .bottom-nav { display: none; }
+}
+
+@media (min-width: 760px) {
+  .content { padding: 24px 28px; }
+  .device-list { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .dev-card.expanded .dev-spark-row { display: block; }
+}
+
+@media (min-width: 1100px) {
+  .device-list { grid-template-columns: repeat(3, 1fr); }
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="wordmark">Cool <small>RMM</small></div>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="pulse"></div><span id="clock">--:--:--</span></div>
+      <div class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SLIDE DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-backdrop" onclick="toggleDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-nav">
+      <div class="nav-section-label">Monitor</div>
+      <div class="nav-link active">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2" stroke-linecap="round"/></svg>
+        Devices <span class="nav-badge g">3</span>
+      </div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2v4M8 10v4M2 8h4M10 8h4"/><circle cx="8" cy="8" r="2"/></svg>
+        Alerts <span class="nav-badge">2</span>
+      </div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><polyline points="1,12 4,7 7,9 10,4 13,6 15,5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Metrics
+      </div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12M6 6v8"/></svg>
+        Event Log
+      </div>
+      <div class="nav-section-label" style="margin-top:8px">Manage</div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2" stroke-linecap="round"/></svg>
+        Remote
+      </div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+        Policies
+      </div>
+      <div class="nav-section-label" style="margin-top:8px">System</div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+        Users
+      </div>
+      <div class="nav-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.42 1.42M11.36 11.36l1.42 1.42M3.22 12.78l1.42-1.42M11.36 4.64l1.42-1.42"/></svg>
+        Settings
+      </div>
+    </div>
+    <div class="drawer-footer">
+      HOST: 10.0.0.1:8443<br>
+      POLL: 60s<br>
+      RETENTION: 30d<br>
+      v0.1.0-proto
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip" id="summary-strip">
+    <div class="sum-card c-green">
+      <div class="sum-label">Online</div>
+      <div class="sum-val green" id="s-online">2</div>
+      <div class="sum-sub">of 3 devices</div>
+    </div>
+    <div class="sum-card c-red">
+      <div class="sum-label">Alerts</div>
+      <div class="sum-val red" id="s-alerts">2</div>
+      <div class="sum-sub">1 crit · 1 warn</div>
+    </div>
+    <div class="sum-card c-yellow">
+      <div class="sum-label">Avg CPU</div>
+      <div class="sum-val yellow" id="s-cpu">—</div>
+      <div class="sum-sub">online devices</div>
+    </div>
+    <div class="sum-card c-blue">
+      <div class="sum-label">Checked In</div>
+      <div class="sum-val blue">0s</div>
+      <div class="sum-sub">DESKTOP-01</div>
+    </div>
+  </div>
+
+  <!-- DEVICES -->
+  <div class="sec-head">
+    <div class="sec-title">Devices</div>
+    <button class="sec-action" onclick="addDevice()">+ Add</button>
+  </div>
+  <div class="device-list" id="device-list"></div>
+  <div class="add-slot" onclick="addDevice()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/></svg>
+    Enroll new device
+  </div>
+
+  <!-- ALERTS -->
+  <div class="sec-head">
+    <div class="sec-title">Active Alerts</div>
+    <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--sub)">2 open</span>
+  </div>
+  <div class="alert-list" id="alert-list"></div>
+
+  <!-- EVENT LOG -->
+  <div class="sec-head" style="margin-top:8px">
+    <div class="sec-title">Event Log</div>
+    <span id="log-count" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--sub)">—</span>
+  </div>
+  <div class="log-panel">
+    <div id="log-entries"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV (mobile only) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <div class="bnav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <span>Devices</span>
+    </div>
+    <div class="bnav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Alerts</span>
+      <div class="bnav-badge">2</div>
+    </div>
+    <div class="bnav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="3,17 7,11 11,13 15,7 19,9 21,8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Metrics</span>
+    </div>
+    <div class="bnav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 10h16M4 14h10"/></svg>
+      <span>Log</span>
+    </div>
+  </div>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// Cool RMM Dashboard — live mode
+// Polls GET /api/devices every POLL_MS milliseconds
+// Falls back to a "connecting…" state if the server is unreachable
+// ═══════════════════════════════════════════════════════════════════════════
+
+const POLL_MS       = 15000;   // 15 seconds
+const SPARK_COLORS  = ['#0fdf8f','#f0b429','#f53d5b','#3d9bff','#c77dff','#ff9f43'];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let liveDevices   = [];
+let liveAlerts    = [];
+const logs        = [];
+const expandedCards = new Set();
+let   colorMap    = {};   // device_id → spark color
+let   colorIndex  = 0;
+let   connected   = false;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const barClass  = v => v >= 85 ? 'high' : v >= 65 ? 'med' : 'low';
+const fmtUptime = s => {
+  if (!s) return 'offline';
+  const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+};
+const safe = v => String(v ?? '—').replace(/</g,'&lt;');
+
+function colorFor(id) {
+  if (!colorMap[id]) {
+    colorMap[id] = SPARK_COLORS[colorIndex % SPARK_COLORS.length];
+    colorIndex++;
+  }
+  return colorMap[id];
+}
+
+// ── SPARKLINE ─────────────────────────────────────────────────────────────────
+function drawSparkline(canvas, data, color) {
+  if (!canvas || !data || data.length < 2) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth || 220, h = canvas.offsetHeight || 36;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const pts = data.map((v, i) => ({ x: (i / (data.length-1)) * w, y: h - ((Math.min(v,100) / 100) * h) }));
+  // gradient fill
+  ctx.beginPath();
+  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+  ctx.lineTo(pts[pts.length-1].x, h); ctx.lineTo(0, h); ctx.closePath();
+  const g = ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0, color+'44'); g.addColorStop(1, color+'00');
+  ctx.fillStyle = g; ctx.fill();
+  // line
+  ctx.beginPath();
+  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+}
+
+// ── DEFENDER BADGE ────────────────────────────────────────────────────────────
+function defenderBadge(def) {
+  if (!def || !def.available) {
+    return `<span style="color:var(--sub);font-size:10px">Defender: n/a</span>`;
+  }
+  const ok = def.status_ok;
+  const color = ok ? 'var(--green)' : 'var(--red)';
+  const label = ok ? 'Defender ✓' : 'Defender OFF';
+  const age   = def.definition_age_days != null ? ` · defs ${def.definition_age_days}d` : '';
+  return `<span style="color:${color};font-size:10px;font-family:'DM Mono',monospace">${label}${age}</span>`;
+}
+
+// ── USER BADGE ────────────────────────────────────────────────────────────────
+function userBadge(user) {
+  if (!user || !user.logged_in) {
+    return `<span style="color:var(--sub);font-size:10px;font-family:'DM Mono',monospace">No user logged in</span>`;
+  }
+  const who = user.domain ? `${user.domain}\\${user.username}` : user.username;
+  return `<span style="color:var(--blue);font-size:10px;font-family:'DM Mono',monospace">👤 ${safe(who)}</span>`;
+}
+
+// ── RENDER DEVICES ────────────────────────────────────────────────────────────
+function renderDevices() {
+  const list = document.getElementById('device-list');
+  if (!liveDevices.length) {
+    list.innerHTML = `<div style="color:var(--sub);font-family:'DM Mono',monospace;font-size:11px;padding:24px 0;text-align:center;grid-column:1/-1">
+      ${connected ? 'No devices enrolled yet. Run the agent on a Windows machine.' : 'Connecting to server…'}
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  liveDevices.forEach((dev, idx) => {
+    const expanded = expandedCards.has(dev.device_id);
+    const color    = colorFor(dev.device_id);
+    const card     = document.createElement('div');
+    card.className = `dev-card ${dev.status}${expanded ? ' expanded' : ''}`;
+    card.dataset.id = dev.device_id;
+
+    const cpu  = dev.cpu_pct  != null ? Math.round(dev.cpu_pct)  : null;
+    const ram  = dev.ram_pct  != null ? Math.round(dev.ram_pct)  : null;
+    const disk = dev.disk_pct != null ? Math.round(dev.disk_pct) : null;
+
+    let metricsHTML = '';
+    if (dev.status !== 'offline' && cpu != null) {
+      const mets = [
+        { label:'CPU',  val: cpu  },
+        { label:'RAM',  val: ram  },
+        { label:'DISK', val: disk },
+      ];
+      metricsHTML = `<div class="dev-metrics">${mets.map(m => `
+        <div class="metric-block">
+          <div class="m-label">${m.label}</div>
+          <div class="m-val ${barClass(m.val)}">${m.val}%</div>
+          <div class="bar-track"><div class="bar-fill ${barClass(m.val)}" style="width:${m.val}%"></div></div>
+        </div>`).join('')}
+      </div>`;
+    } else if (dev.status === 'offline') {
+      metricsHTML = `<div class="dev-offline-msg">No data — device offline<br>
+        <span style="color:var(--red);font-size:10px">last seen ${safe(dev.last_seen_age)}</span></div>`;
+    } else {
+      metricsHTML = `<div class="dev-offline-msg">Waiting for first check-in…</div>`;
+    }
+
+    // Power source icon for laptops
+    const powerIcon = dev.power?.is_laptop
+      ? (dev.power.source === 'battery'
+          ? `🔋 ${dev.power.battery_pct ?? '?'}%`
+          : `🔌 AC`)
+      : '';
+
+    card.innerHTML = `
+      <div class="dev-top">
+        <div class="dev-ident">
+          <div class="dev-hostname">${safe(dev.hostname)}</div>
+          <div class="dev-meta">Win ${safe(dev.os_release)} · ${safe(dev.last_seen_age)} ${powerIcon}</div>
+        </div>
+        <div class="dev-right">
+          <span class="status-pill ${dev.status}">${dev.status}</span>
+          <span class="dev-uptime">${fmtUptime(dev.uptime_sec)}</span>
+        </div>
+      </div>
+      ${metricsHTML}
+      <div style="padding:0 14px 12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        ${defenderBadge(dev.defender)}
+        ${userBadge(dev.current_user)}
+      </div>
+      <div class="dev-spark-row">
+        <div class="spark-label">CPU history — last ${(dev.cpu_history||[]).length} polls</div>
+        <canvas class="spark" id="spark-${dev.device_id}" height="36"></canvas>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      if (expandedCards.has(dev.device_id)) expandedCards.delete(dev.device_id);
+      else expandedCards.add(dev.device_id);
+      renderDevices();
+    });
+
+    list.appendChild(card);
+
+    if (expanded && dev.cpu_history?.length > 1) {
+      requestAnimationFrame(() => {
+        const c = document.getElementById('spark-' + dev.device_id);
+        if (c) drawSparkline(c, dev.cpu_history, color);
+      });
+    }
+  });
+}
+
+// ── RENDER ALERTS ─────────────────────────────────────────────────────────────
+function renderAlerts() {
+  const el = document.getElementById('alert-list');
+  const alertCountEl = document.querySelector('.sec-head .sec-action + span, .sec-head span[style]');
+  if (!liveAlerts.length) {
+    el.innerHTML = `<div style="color:var(--sub);font-family:'DM Mono',monospace;font-size:11px;padding:16px 0;text-align:center">No active alerts</div>`;
+    return;
+  }
+  el.innerHTML = liveAlerts.map(a => `
+    <div class="alert-card ${a.sev}">
+      <span class="alert-sev ${a.sev}">${safe(a.sev)}</span>
+      <div class="alert-body">
+        <div class="alert-msg">${safe(a.msg)}</div>
+        <div class="alert-meta">${safe(a.device)} · ${safe(a.time)}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+function addLog(host, msg) {
+  const ts = new Date().toLocaleTimeString('en-US', {hour12: false});
+  logs.unshift({ts, host, msg});
+  if (logs.length > 12) logs.pop();
+  renderLog();
+}
+function renderLog() {
+  document.getElementById('log-count').textContent = logs.length + ' entries';
+  document.getElementById('log-entries').innerHTML = logs.map(e => `
+    <div class="log-entry">
+      <span class="log-ts">${e.ts}</span>
+      <span class="log-content"><span class="log-host">${safe(e.host)} </span>${safe(e.msg)}</span>
+    </div>`).join('');
+}
+
+// ── SUMMARY STRIP ─────────────────────────────────────────────────────────────
+function renderSummary(data) {
+  document.getElementById('s-online').textContent  = data.online_count ?? '—';
+  document.getElementById('s-alerts').textContent  = data.alert_count  ?? '0';
+
+  const cpuEl = document.getElementById('s-cpu');
+  const avg   = data.avg_cpu;
+  cpuEl.textContent = avg != null ? avg + '%' : '—';
+  cpuEl.className   = 'sum-val ' + (avg >= 80 ? 'red' : avg >= 60 ? 'yellow' : 'green');
+
+  // Update alert badge in bottom nav
+  const badge = document.querySelector('.bnav-badge');
+  if (badge) badge.textContent = data.alert_count || '0';
+
+  // Update drawer alert badge
+  const drawerBadge = document.querySelector('.nav-badge:not(.g)');
+  if (drawerBadge) drawerBadge.textContent = data.alert_count || '0';
+}
+
+// ── FETCH FROM SERVER ─────────────────────────────────────────────────────────
+async function fetchDevices() {
+  try {
+    const resp = await fetch('/api/devices', { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    connected    = true;
+    liveDevices  = data.devices  || [];
+    liveAlerts   = data.alerts   || [];
+
+    renderDevices();
+    renderAlerts();
+    renderSummary(data);
+
+    // Log any new check-ins
+    liveDevices.forEach(dev => {
+      if (dev.last_seen_age === 'just now') {
+        addLog(dev.hostname, 'check-in received');
+      }
+    });
+
+    // Flash pulse green = connected
+    document.querySelector('.pulse').style.background = 'var(--green)';
+
+  } catch (err) {
+    connected = false;
+    document.querySelector('.pulse').style.background = 'var(--red)';
+    addLog('SERVER', 'unreachable — retrying…');
+    renderDevices(); // shows "Connecting…"
+    console.warn('Cool RMM: fetch failed', err);
+  }
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function tickClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US', {hour12: false});
+}
+
+// ── DRAWER ────────────────────────────────────────────────────────────────────
+function toggleDrawer() {
+  document.getElementById('drawer').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+
+// ── ADD DEVICE ────────────────────────────────────────────────────────────────
+function addDevice() {
+  alert('Install the agent on a Windows machine:\n\n1. pip install psutil requests\n2. Edit SERVER_URL in agent.py\n3. python agent.py\n\nThe device will appear here within 60 seconds.');
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+addLog('SYSTEM', 'cool rmm dashboard started');
+addLog('SYSTEM', `polling /api/devices every ${POLL_MS/1000}s`);
+
+fetchDevices();                        // immediate first fetch
+setInterval(fetchDevices, POLL_MS);    // then every 15s
+setInterval(tickClock, 1000);
+tickClock();
+</script>
+</body>
+</html>
