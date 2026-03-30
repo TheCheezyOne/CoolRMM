@@ -29,12 +29,12 @@ import uvicorn
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
-HOST             = "192.168.40.157"
+HOST             = "192.168.40.157" # set to your server's LAN IP or 0.0.0.0"
 PORT             = 8000
 OFFLINE_AFTER    = 120        # seconds without check-in → device shown as offline
 HISTORY_POINTS   = 20         # CPU history points kept per device
 DATA_FILE        = "devices.json"   # simple flat-file persistence
-DASHBOARD_FILE   = "rmm-mobile.html"
+DASHBOARD_FILE   = "rmm-mobile_v.0.1.2.html"
 # ─────────────────────────────────────────────────────────────────────────────
 
 logging.basicConfig(
