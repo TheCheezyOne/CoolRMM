@@ -1,9 +1,9 @@
 {
   "c7f1b5cc-09d3-4d31-b717-cefc413d8cd4": {
-    "agent_version": "0.2.0",
+    "agent_version": "0.3.0",
     "device_id": "c7f1b5cc-09d3-4d31-b717-cefc413d8cd4",
-    "timestamp": "2026-03-30T20:04:40.011780+00:00",
-    "uptime_sec": 325679,
+    "timestamp": "2026-03-30T20:34:40.382925+00:00",
+    "uptime_sec": 327480,
     "os": {
       "name": "Windows",
       "version": "10.0.26100",
@@ -12,13 +12,13 @@
       "hostname": "DESKTOP-UDMNUD1"
     },
     "cpu": {
-      "usage_pct": 8.9,
+      "usage_pct": 28.4,
       "core_count": 4,
       "freq_mhz": 3408.0
     },
     "memory": {
       "total_gb": 8.48,
-      "used_pct": 63.0
+      "used_pct": 64.9
     },
     "disk": {
       "total_gb": 126.7,
@@ -31,8 +31,18 @@
       "source": "wmic"
     },
     "defender": {
-      "available": false,
-      "error": "Cannot find an overload for \"op_Subtraction\" and the argument count: \"2\"."
+      "installed": true,
+      "status_ok": true,
+      "condition": "running",
+      "process": {
+        "found": true,
+        "name": "EPSecurityService.exe",
+        "pid": 3428
+      },
+      "services": {
+        "checked": false,
+        "reason": "not needed \u2014 process found"
+      }
     },
     "blackpoint_snap": {
       "installed": true,
@@ -54,36 +64,36 @@
       "battery_pct": null,
       "is_laptop": false
     },
-    "last_seen": 1774901082.8337536,
+    "last_seen": 1774902881.4423733,
     "cpu_history": [
-      20.7,
-      15.4,
-      14.8,
-      14.2,
-      26.5,
-      20.0,
-      17.4,
-      9.3,
-      8.6,
-      9.7,
-      22.5,
-      33.3,
-      15.7,
-      15.4,
-      13.7,
       11.7,
       15.3,
       32.6,
       10.6,
-      8.9
+      8.9,
+      37.4,
+      48.5,
+      30.9,
+      46.6,
+      38.5,
+      29.4,
+      10.9,
+      20.7,
+      39.0,
+      16.7,
+      20.8,
+      9.3,
+      17.6,
+      44.0,
+      28.4
     ],
-    "checkin_count": 3948
+    "checkin_count": 3963
   },
   "1ca9c7b7-102d-4677-aaf0-98e630e7f191": {
     "agent_version": "0.2.0",
     "device_id": "1ca9c7b7-102d-4677-aaf0-98e630e7f191",
-    "timestamp": "2026-03-30T20:04:23.344635+00:00",
-    "uptime_sec": 326423,
+    "timestamp": "2026-03-30T20:34:36.389497+00:00",
+    "uptime_sec": 328236,
     "os": {
       "name": "Windows",
       "version": "10.0.26200",
@@ -92,7 +102,7 @@
       "hostname": "TechSandbox"
     },
     "cpu": {
-      "usage_pct": 12.1,
+      "usage_pct": 6.2,
       "core_count": 4,
       "freq_mhz": 2700.0
     },
@@ -144,30 +154,30 @@
       "battery_pct": null,
       "is_laptop": false
     },
-    "last_seen": 1774901064.9618313,
+    "last_seen": 1774902877.7368963,
     "cpu_history": [
-      26.7,
-      26.0,
-      17.4,
-      34.5,
-      30.3,
-      10.5,
-      9.7,
-      9.7,
       10.4,
-      8.9,
-      9.8,
-      11.2,
+      12.1,
+      1.9,
+      22.2,
+      2.3,
       8.1,
-      9.6,
-      7.4,
-      9.8,
-      11.3,
-      10.0,
-      10.4,
-      12.1
+      3.9,
+      3.5,
+      5.0,
+      6.2,
+      4.3,
+      3.5,
+      3.1,
+      2.3,
+      1.2,
+      3.9,
+      7.0,
+      3.1,
+      2.3,
+      6.2
     ],
-    "checkin_count": 2705
+    "checkin_count": 2723
   },
   "3be10fff-fbd8-4764-b559-e3bde58e72ca": {
     "agent_version": "0.1.0",
